@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Os 12 Arquétipos</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Georgia, "Times New Roman", serif;
+    background: radial-gradient(circle at top, #24243e 0%, #0d0d18 55%, #050509 100%);
+    color: #f4f1e8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+  }
+  .container {
+    width: min(900px, 100%);
+    text-align: center;
+  }
+  h1 {
+    font-size: clamp(30px, 6vw, 52px);
+    margin: 0 0 8px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    color: #c9c5b9;
+    margin: 0 0 28px;
+    font-family: Arial, sans-serif;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .archetype {
+    border: 1px solid #55536b;
+    background: rgba(255,255,255,.06);
+    color: #eeeae0;
+    padding: 18px 10px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 17px;
+    transition: .25s ease;
+    min-height: 64px;
+  }
+  .archetype:hover {
+    transform: translateY(-2px);
+    border-color: #d8b45a;
+  }
+  .archetype.selected {
+    color: #e4bd55;
+    border-color: #e4bd55;
+    text-shadow: 0 0 12px rgba(228,189,85,.35);
+  }
+  .status {
+    min-height: 28px;
+    margin-top: 22px;
+    font-family: Arial, sans-serif;
+    color: #d6d2c8;
+  }
+  .success { color: #e4bd55; }
+  .error { color: #ef8d8d; }
+  .small {
+    margin-top: 18px;
+    color: #777486;
+    font: 12px Arial, sans-serif;
+  }
+  @media (max-width: 650px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .archetype { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Os 12 Arquétipos</h1>
+ 
+<br>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="status" id="status"></div>
+  
+</div>
+
+<script>
+/*
+  ============================================================
+  CONFIGURAÇÃO
+  ============================================================
+  1. Depois de criar seu Google Apps Script, coloque aqui a URL
+     da implantação /exec.
+  2. NÃO coloque o token do Telegram neste HTML.
+*/
+const TELEGRAM_ENDPOINT = "https://script.google.com/macros/s/AKfycbx_vTcoBUTp0-cjiRvwwVSvCjlJqw8QukdN7adr-hm4tA39jWZZpogjJcQfKpXRR6gnKQ/exec";
+
+const archetypes = [
+  "Inocente", "Explorador", "Sábio", "Herói",
+  "Rebelde", "Mago", "Pessoa Comum", "Amante",
+  "Bobo da Corte", "Prestativo", "Criador", "Governante"
+];
+
+const grid = document.getElementById("grid");
+
+archetypes.forEach(name => {
+  const button = document.createElement("button");
+  button.className = "archetype";
+  button.textContent = name;
+
+  button.addEventListener("click", async () => {
+    // Evita múltiplas escolhas.
+    if (button.classList.contains("selected")) return;
+
+    document.querySelectorAll(".archetype").forEach(b => {
+      b.classList.remove("selected");
+    });
+    button.classList.add("selected");
+
+
+    // Envia somente a escolha para o seu endpoint.
+    if (TELEGRAM_ENDPOINT.startsWith("http")) {
+      try {
+        await fetch(TELEGRAM_ENDPOINT, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {"Content-Type": "text/plain;charset=utf-8"},
+          body: JSON.stringify({
+            archetype: name,
+            timestamp: new Date().toISOString()
+          })
+        });
+      } catch (e) {
+        // Mantém o efeito funcionando mesmo se o envio falhar.
+        console.log("Envio não confirmado:", e);
+      }
+    }
+  });
+
+  grid.appendChild(button);
+});
+</script>
+</body>
+</html>
